@@ -1,0 +1,49 @@
+{ Lanceur= CFDshape } 
+
+
+{ CFDshape =
+    { Type= ModeleDeModeles }
+    { Data=
+		{ Champ=             
+            { Type= P0C_Scalaire_Par }             
+            { Nom= Marge }             
+            { Data= ValeurItem 1 50 }         
+        }  
+		{ Champ=             
+            { Type= P0C_Scalaire_Par }             
+            { Nom= coco }             
+            { Data= ValeurItem 1 4 }         
+        }  		
+    }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Modele= Increments }                    
+    }
+}
+
+
+Increments
+{ Fichier: Increments/increments.mtc }
+{ Fichier: Increments/temps.mtc }
+
+Maillage
+{ Fichier: Maillage/MetriqueGenerale.mtc }
+{ Fichier: Maillage/adaptation.mtc }
+{ Fichier: Maillage/DeLaFonction.mtc }
+{ Fichier: Maillage/Associateur.mtc }
+{ Fichier: Maillage/maillage.mtc }
+
+Geometrie
+{ Fichier: Geometrie/Geometres.mtc }
+
+Solveur
+{ Fichier: Solveur/Mecanique.mtc }
+{ Fichier: Solveur/CLMecanique.mtc }
+  Fichier: DragLift/DragLift.mtc 
+  Fichier: Torque/Torque.mtc 
+
+IO	
+{ Fichier: IO/output.mtc }
+{ Fichier: IO/Parametres.mtc }
+{ Fichier: IO/Interacteur.mtc }
+

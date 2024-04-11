@@ -1,0 +1,45 @@
+{ Interacteur=
+	{ Type= ModeleInteracteur }
+	{ IHM= IHM.mtc }
+	{ Data=
+		{ Champ=
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Prompt }
+			{ Data= 1 1 1 }
+		}
+		{ Champ=
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Prompteur }
+			{ Data= 1 1 0 }
+		}
+	}
+	{ DependanceModifiable= 
+		{ Champ= PasDeTemps }
+		{ Champ= Eta1 }
+		{ Champ= Rho1 }
+	
+		{ Champ= NbElements }
+	
+
+		{ Champ= Nscaling }
+		{ Champ= ScaleNorme }
+
+
+		{ Champ= hMin }
+		{ Champ= Err1 }
+		{ Champ= Err2 }
+	
+		{ Champ= TempsFin }
+		{ Champ= Prompt }
+		{ Champ= Prompteur }
+		{ Champ= CompteurTemps }
+		{ Champ= FrequenceStockage_vtk }
+		{ Champ= Adaptateur }
+		{ Champ= MinNorme }
+
+ 
+	}
+ 	{ Dependance= 
+        	{ Maillage= MaillagePrincipal }
+
+}

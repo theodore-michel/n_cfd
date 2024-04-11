@@ -1,0 +1,506 @@
+// # Modele principal
+
+{ Torque=
+    { Type= ModeleDeModeles }
+
+    { Data=
+        { Champ= { Type= P1_Scalaire_Par } { Nom= CoordonneeX } { Data= ValeurItem 0 0 } }          // Abscisses absolues noeuds
+        { Champ= { Type= P1_Scalaire_Par } { Nom= CoordonneeY } { Data= ValeurItem 0 0 } }          // Ordonnees absolues noeuds
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= CoordonneeOx } { Data= ValeurItem 0 0 } }      // Abscisse nouvelle origine
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= CoordonneeOy } { Data= ValeurItem 0 0 } }        // Ordonnee nouvelle origine
+        { Champ= { Type= P1_Scalaire_Par } { Nom= OMx } { Data= ValeurItem 0 0 } }                  // Abscisses relatives noeuds (nouvelle origine)
+        { Champ= { Type= P1_Scalaire_Par } { Nom= OMy } { Data= ValeurItem 0 0 } }                  // Ordonnees relatives noeuds (nouvelle origine)
+
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= h } { Data= ValeurItem 1 1e-6 } }                // Pas derivee numerique locale
+        { Champ= { Type= P0_Vecteur_Par } { Nom= Grad } { Data= ValeurItem 2 0 0 } }                // Gradient LevelSet
+        { Champ= { Type= P0_Scalaire_Par } { Nom= Gradx } { Data= ValeurItem 1 0 } }                // Abscisse gradient
+        { Champ= { Type= P0_Scalaire_Par } { Nom= Grady } { Data= ValeurItem 1 0 } }                // Ordonnee gradient
+        { Champ= { Type= P0_Scalaire_Par } { Nom= NormeGrad } { Data= ValeurItem 1 0 } }            // Norme gradient
+
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= TorqueInit } { Data= ValeurItem 1 0 } }          // Initialisation couple local
+        { Champ= { Type= P0_Scalaire_Par } { Nom= LocalTorque } { Data= ValeurItem 1 0 } }          // Couple local
+        { Champ= { Type= P0_Scalaire_Par } { Nom= TailleMaille } { Data= ValeurItem 1 0 } }         // Taille maille locale
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= LSE5FMax } { Data= ValeurItem 1 0 } }            // Valeur maximale LevelSetEntree5Filtree
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= LSE5FMin } { Data= ValeurItem 1 0 } }            // Valeur minimale LevelSetEntree5Filtree
+        { Champ= { Type= P0_Scalaire_Par } { Nom= LSE5FP0 } { Data= ValeurItem 1 0 } }              // LevelSetEntree5Filtree interpolee P0
+        { Champ= { Type= P0_Scalaire_Par } { Nom= PressionP0 } { Data= ValeurItem 1 0 } }           // Pression interpolee P0
+        { Champ= { Type= P0_Scalaire_Par } { Nom= PressionReelle } { Data= ValeurItem 1 0 } }       // LSE5FP0 retravaillee
+        { Champ= { Type= P0_Scalaire_Par } { Nom= FonctionActivation } { Data= ValeurItem 1 0 } }   // Fonction d'activation du calcul torque local
+        { Champ= { Type= P0_Scalaire_Par } { Nom= OMxP0 } { Data= ValeurItem 1 0 } }                // OMx interpolee P0
+        { Champ= { Type= P0_Scalaire_Par } { Nom= OMyP0 } { Data= ValeurItem 1 0 } }                // OMy interpolee P0
+
+        { Champ= { Type= P0_Scalaire_Par } { Nom= LocalTorqueInit } { Data= ValeurItem 1 0 } }      // Initialisation couple resultant
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= Torque } { Data= ValeurItem 1 0 } }              // Couple resultant
+        
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= Denom } { Data= ValeurItem 1 0 } }               // Denominateur commun a PressionReelle et FonctionActivation
+        { Champ= { Type= P0C_Scalaire_Par } { Nom= Epsilon } { Data= ValeurItem 1 1e-6 } }          // Seuil de division par zero (CalculCoupleLocal)
+    }
+    
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+
+        { Modele= ExtraireCoordonnees }
+        { Modele= VecteurPosition }
+
+        { Modele= GradientLevelSet }
+        { Modele= ExtraireGradient }
+        { Modele= CalculNormeGrad }
+
+        { Modele= InterpolationP0 }
+        { Modele= RecupLSE5FMax }
+        { Modele= RecupLSE5FMin }
+        { Modele= RecupTaille }
+        { Modele= CalculPressionReelle }
+        { Modele= CalculFonctionActivation }
+        { Modele= CalculCoupleLocal }
+
+        { Modele= InitCouple }
+        { Modele= CalculCouple }
+
+        { Modele= CapteursTorque }
+    }
+}
+
+
+
+// ## Extraction coordonnees
+
+{ ExtraireCoordonnees=
+    { Type= ModeleParticulaire }
+    { Data=
+        { ItemSolveur=
+            { Type= ISExtraire }
+            { NbChampSolution= 2 }
+            { ChampSolution= CoordonneeX CoordonneeY }
+            { NbChampParametre= 1 }
+            { ChampParametre= Coordonnees }
+            { Demultiplexage= 1 }
+        }
+    }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Champ= Coordonnees }
+    }
+    { DependanceModifiable=
+        { Champ= CoordonneeX }
+        { Champ= CoordonneeY }
+    }
+}
+
+
+
+
+// ## Calcul vecteur position
+
+{ VecteurPosition=
+    { Type= ModeleArithmetique }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Champ= CoordonneeX }
+        { Champ= CoordonneeY }
+        { Champ= CoordonneeOx }
+        { Champ= CoordonneeOy }
+    }
+    { DependanceModifiable=
+        { Champ= OMx }
+        { Champ= OMy }
+    }
+    { Operation= OMx = CoordonneeX }
+    { Operation= OMy = CoordonneeY }
+    { Operation= OMx -= CoordonneeOx }
+    { Operation= OMy -= CoordonneeOy }
+}
+
+
+
+// ## Calcul jacobienne
+
+{ GradientLevelSet=
+    { Type= ModeleFonctionnel }
+    { Data=
+       { Boucle= Volume }
+       { SimplexSolveurFonctionnel=
+          { Type= SsfGradient }
+          { NbChampSolution= 1 }
+          { ChampSolution= Grad }
+          { NbChampParametre= 1 }
+          { ChampParametre= LevelSetEntree5Filtree }
+       }
+    }
+    { DependanceModifiable=
+        { Champ= Grad }
+    }
+    { Dependance=
+       { Maillage= MaillagePrincipal }
+       { Champ= LevelSetEntree5Filtree }
+    }
+}
+
+
+
+// ## Extraction composantes gradient
+
+{ ExtraireGradient=
+    { Type= ModeleParticulaire }
+    { Data=
+        { ItemSolveur=
+            { Type= ISExtraire }
+            { NbChampSolution= 2 }
+            { ChampSolution= Gradx Grady }
+            { NbChampParametre= 1 }
+            { ChampParametre= Grad }
+            { Demultiplexage= 1 }
+        }
+    }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Champ= Grad }
+    }
+    { DependanceModifiable=
+        { Champ= Gradx }
+        { Champ= Grady }
+    }
+}
+
+
+
+// ## Calcul norme gradient
+
+{ CalculNormeGrad=
+    { Type= ModeleArithmetique }
+    { Data=
+        { Champ=
+            { Type= P0_Scalaire_Par }
+            { Nom= Intermediaire }
+            { Data= ValeurItem 1 0 }
+        }
+        { Champ=
+            { Type= P0C_Scalaire_Par }
+            { Nom= Racine }
+            { Data= ValeurItem 1 0.5 }
+        }
+    }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Champ= Gradx }
+        { Champ= Grady }
+        { Champ= Racine }
+    }
+    { DependanceModifiable=
+        { Champ= NormeGrad }
+        { Champ= Intermediaire }
+    }
+    { Operation= NormeGrad = Gradx }
+    { Operation= NormeGrad *= Gradx }
+    { Operation= Intermediaire = Grady }
+    { Operation= Intermediaire *= Grady }
+    { Operation= NormeGrad += Intermediaire }
+    { Operation= NormeGrad **= Racine }
+}
+
+
+
+// ## Interpolation P0 de differents champs
+
+{ InterpolationP0=
+  { Type= ModeleFonctionnel }
+  { Data=
+    { SimplexSolveurFonctionnel=
+      { Type= SsfPointIntegration }
+      { NbChampSolution=4 }
+      { ChampSolution= PressionP0 LSE5FP0 OMxP0 OMyP0 }
+      { NbChampParametre=4 }
+      { ChampParametre= Pression LevelSetEntree5Filtree OMx OMy }
+      { Ordre= 1 }
+    }
+  }
+  { DependanceModifiable=
+    { Champ= PressionP0 }
+    { Champ= LSE5FP0 }
+    { Champ= OMxP0 }
+    { Champ= OMyP0 }
+  }
+  { Dependance=
+    { Maillage= MaillagePrincipal }
+    { Champ= Pression }
+    { Champ= LevelSetEntree5Filtree }
+    { Champ= OMx }
+    { Champ= OMy }
+  }
+}
+
+
+
+// ## Recuperation taille maille
+
+{ RecupTaille=
+    { Type= ModeleFonctionnel }
+    { Data=
+       { SimplexSolveurFonctionnel=
+          { Type= SsfArete }
+          { TypeDArete= moy }
+          { NbChampSolution= 1 }
+          { ChampSolution= TailleMaille }
+       }
+    }
+    { DependanceModifiable=
+        { Champ= TailleMaille }
+    }
+    { Dependance=
+       { Maillage= MaillagePrincipal }
+    }
+}
+
+
+
+// ## Recuperation valeur maximale LSE5FP0
+
+{ RecupLSE5FMax=
+    { Type= ModeleParticulaire }
+    { Data=
+       { Boucle= Volume }
+       { ItemSolveur=
+          { Type= ISMax }
+          { Operations=
+            { NbChampsATraiter= 1 }
+            { Numero= 0 }
+            // { Initialise= Zero }
+          }
+          { NbChampSolution= 1 }
+          { ChampSolution= LSE5FMax }
+          { NbChampParametre= 1 }
+          { ChampParametre= LSE5FP0 }           
+       }
+    }
+    { DependanceModifiable=
+        { Champ= LSE5FMax }
+    }
+    { Dependance=
+       { Maillage= MaillagePrincipal }
+       { Champ= LSE5FP0 }
+       { Champ= Zero }
+    }
+}
+
+
+
+// ## Recuperation valeur minimale LSE5FP0
+
+{ RecupLSE5FMin=
+    { Type= ModeleParticulaire }
+    { Data=
+       { Boucle= Volume }
+       { ItemSolveur=
+          { Type= ISMin }
+          { Operations=
+            { NbChampsATraiter= 1 }
+            { Numero= 0 }
+            // { Initialise= Zero }
+          }
+          { NbChampSolution= 1 }
+          { ChampSolution= LSE5FMin }
+          { NbChampParametre= 1 }
+          { ChampParametre= LSE5FP0 }           
+       }
+    }
+    { DependanceModifiable=
+        { Champ= LSE5FMin }
+    }
+    { Dependance=
+       { Maillage= MaillagePrincipal }
+       { Champ= LSE5FP0 }
+       { Champ= Zero }
+    }
+}
+
+
+
+// ## Calcul PressionReelle
+
+{ CalculPressionReelle=
+    { Type= ModeleArithmetique }
+    { Dependance=
+        { Modele= MaillagePrincipal }
+        { Champ= LSE5FP0 }
+        { Champ= LSE5FMax }
+        { Champ= LSE5FMin }
+        { Champ= PressionP0 }
+    }
+    { DependanceModifiable=
+        { Champ= PressionReelle }
+        { Champ= Denom }
+    }
+    { Operation= Denom = LSE5FMax }
+    { Operation= Denom -= LSE5FMin }
+    { Operation= PressionReelle = LSE5FMax }
+    { Operation= PressionReelle -= LSE5FP0 }
+    { Operation= PressionReelle /= Denom }
+    { Operation= PressionReelle *= PressionP0 }
+}
+
+
+
+// ## Calcul FonctionActivation
+
+{ CalculFonctionActivation=
+    { Type= ModeleArithmetique }
+    { Dependance=
+        { Modele= MaillagePrincipal }
+        { Champ= LSE5FP0 }
+        { Champ= LSE5FMin }
+        { Champ= Denom }
+    }
+    { DependanceModifiable=
+        { Champ= FonctionActivation }
+    }
+    { Operation= FonctionActivation = LSE5FP0 }
+    { Operation= FonctionActivation -= LSE5FMin }
+    { Operation= FonctionActivation /= Denom }
+}
+
+
+
+// ## Calcul couple local
+
+{ CalculCoupleLocal=
+    { Type= ModeleArithmetique }
+    { Data=
+        { Champ=
+            { Type= P0_Scalaire_Par }
+            { Nom= Intermediaire_1 }
+            { Data= ValeurItem 1 0 }
+        }
+        { Champ=
+            { Type= P0_Scalaire_Par }
+            { Nom= Intermediaire_2 }
+            { Data= ValeurItem 1 0 }
+        }
+        { Champ=
+            { Type= P0_Scalaire_Par }
+            { Nom= Intermediaire_3 }
+            { Data= ValeurItem 1 0 }
+        }
+        { Champ=
+            { Type= P0_Scalaire_Par }
+            { Nom= Intermediaire_4 }
+            { Data= ValeurItem 1 0 }
+        }
+    }
+    { Dependance=
+        { Maillage= MaillagePrincipal }
+        { Champ= NormeGrad }
+        { Champ= Gradx }
+        { Champ= Grady }
+        { Champ= OMxP0 }
+        { Champ= OMyP0 }
+        { Champ= Epsilon }
+        { Champ= PressionReelle }
+        { Champ= FonctionActivation }
+        { Champ= TailleMaille }
+		{ Champ= LocalTorqueInit }
+    }
+    { DependanceModifiable=
+        { Champ= LocalTorque }
+        { Champ= Intermediaire_1 }
+        { Champ= Intermediaire_2 }
+        { Champ= Intermediaire_3 }
+        { Champ= Intermediaire_4 }
+    }
+    { Operation= LocalTorque = LocalTorqueInit }
+    { Operation= Intermediaire_1 = NormeGrad }
+    { Operation= Intermediaire_1 += Epsilon }
+    { Operation= Intermediaire_2 = OMxP0 }
+    { Operation= Intermediaire_2 *= Grady }
+    { Operation= Intermediaire_3 = OMyP0 }
+    { Operation= Intermediaire_3 *= Gradx }
+    { Operation= Intermediaire_4 = Intermediaire_2 }
+    { Operation= Intermediaire_4 -= Intermediaire_3 }
+    { Operation= LocalTorque += PressionReelle }
+    { Operation= LocalTorque *= FonctionActivation }
+    { Operation= LocalTorque *= Intermediaire_4 }
+    { Operation= LocalTorque *= TailleMaille }
+    { Operation= LocalTorque /= Intermediaire_1 }
+}
+
+
+
+// ## Somme contributions couple
+
+{ InitCouple=
+    { Type= ModeleArithmetique }
+    { Dependance=
+        { Modele= MaillagePrincipal }
+        { Champ= TorqueInit }
+    }
+    { DependanceModifiable=
+        { Champ= Torque }
+    }
+    { Operation= Torque = TorqueInit }
+}
+
+{ CalculCouple=
+    { Type= ModeleParticulaire }
+    { Data=
+       { Boucle= Volume }
+       { ItemSolveur=
+          { Type= ISSomme }
+          { NbChampSolution= 1 }
+          { ChampSolution= Torque }
+          { NbChampParametre= 1 }
+          { ChampParametre= LocalTorque }
+       }
+    }
+    { DependanceModifiable=
+       { Champ= Torque }
+    }
+    { Dependance=
+       { Maillage= MaillagePrincipal }
+       { Champ= LocalTorque }
+    }
+ }
+
+
+
+// ## Ecriture fichier Resultats
+
+{ CapteursTorque=
+	{ Affichage= 1 }
+	{ Type= ModeleCapteur }
+	{ Data= 
+		{ NomFichier= Resultats/Torque }
+		{ NbCapteurs= 1 }
+		{ Dimension= 2  }
+		{ Coordonnees= 
+			{ Point1= 0 0 }
+		}
+		{ HAdaptation= 1 }	
+	}
+	{ Dependance= 
+		{ Maillage= MaillagePrincipal }
+		{ Champ= CompteurTemps }
+		{ Champ= Temps }
+		{ Champ= Torque }
+	}
+}
+
+
+//Capteur de pression
+
+{ CapteursP=
+        { Type= ModeleCapteur }
+        { Data=
+                { NomFichier= Resultats/capteurP }
+                { NbCapteurs= 2 }
+                { HAdaptation= 1 }
+                { Dimension: Dimension/dim.txt }
+                { Coordonnees=
+      { Point1  = -3.5 0 }
+      { Point2  = 6.5 0 }
+                }
+        }
+        { Dependance=
+                { Maillage= MaillagePrincipal }
+                { Champ= Temps }
+                { Champ= Pression }
+        }
+}

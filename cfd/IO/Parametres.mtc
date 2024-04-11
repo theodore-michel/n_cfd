@@ -1,0 +1,135 @@
+{ Parametres= 
+    { Type= ModeleConstant }
+   { Data= 	
+		
+		// Parametres soufflerie
+		
+		{ Champ= 
+           	{ Type= P0C_Scalaire_Par }
+           	{ Nom= VitesseRotation }		// Vitesse rotation forcee rotor
+           	{ Data= ValeurItem 1 -1 }
+        }
+
+		{ Champ= 
+           	{ Type= P0C_Scalaire_Par }
+           	{ Nom= VitesseAir }				// Vitesse injection air
+           	{ Data= ValeurItem 1 1 }
+        }
+
+		// Prametres simu
+
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= PrecisionFrontieres }
+			{ Data= ValeurItem 1 0.0000001 }                        
+        }
+
+       	{ Champ= 
+			{ Type= P1_Scalaire_Par }
+			{ Nom= Alpha }
+			{ Data= ValeurItem 1 0 }
+		}
+		
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Eta1 }
+			{ Data= ValeurItem 1 .01 }
+		}
+				
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Rho1 }
+			{ Data= ValeurItem 1 1000 }
+		}
+		
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Lmax }
+			{ Data= ValeurItem 1 0.015 }
+		}
+	     
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= Lmin }
+			{ Data= ValeurItem 1 .0001 }
+		}
+
+		{ Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= CL }
+            { Data= ValeurItem 1 1000 }                        
+        }
+
+		{ Champ= 
+	    	{ Type= P0C_Scalaire_Par }
+	    	{ Nom= Oui }
+	    	{ Data= ValeurItem 1 1.0 }
+		}
+
+        { Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= Zero }
+            { Data= ValeurItem 1 0.0e-00 }
+        } 
+
+        { Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= Un }
+            { Data= ValeurItem 1 1 }
+        }
+		  
+		{ Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= CentC }
+            { Data= ValeurItem 1 150 }
+        }
+        
+		{ Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= UnS }
+            { Data= ValeurItem 1 1 }
+        }
+        
+		{ Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= Vs }
+            { Data= ValeurItem 1 1 }
+        }
+		
+        { Champ= 
+            { Type= P0C_Scalaire_Par }
+            { Nom= Vout }
+            { Data= ValeurItem 1 5 }
+        }
+        
+		{ Champ= 
+           	{ Type= P0C_Scalaire_Par }
+           	{ Nom= mVs }
+           	{ Data= ValeurItem 1 -1 }
+        }
+        
+		{ Champ= 
+           	{ Type= P1_Scalaire_Par }
+           	{ Nom= Vimp }
+           	{ Data= ValeurItem 1 1 }
+        }
+        
+		{ Champ= 
+           	{ Type= P0C_Vecteur_Par }
+           	{ Nom= Tic }
+           	{ Data: Dimension/vecteur.txt }
+        }
+
+		{ Champ= 
+			{ Type= P1_Vecteur_Par }
+			{ Nom= Gravite }
+			{ Data: Dimension/gravite.txt }
+		}
+  }
+    { Dependance= 
+        { Maillage= MaillagePrincipal }
+
+    }
+}
+
+

@@ -1,0 +1,63 @@
+{ Maillage=
+	{ Type= ModeleMaillage }
+	{ Nom= MaillagePrincipal }
+	 {  M: channel.t }
+
+	
+	{ Data=
+		{ Champ= 
+			{ Type= P0C_Scalaire_Par }
+			{ Nom= LaMarge }
+			{ Data= ValeurItem 1 10 }
+		}
+		{ Champ= 
+			{ Type= P0_Scalaire_Par }
+			{ Nom= BordElement }
+			{ Data= ValeurItem 1 0 }
+		}
+		{ Champ= 
+			{ Type= P1_Scalaire_Par }
+			{ Nom= BordNoeud }
+			{ Data= ValeurItem 1 0 }
+		}
+		{ Champ= 
+			{ Type= P1_Vecteur_Par }
+			{ Nom= Coordonnees }
+			{ Data: Dimension/vecteur.txt } = ValeurItem 2 0 0 0.0 0.0
+		}
+		{ NbChampSolution= 3 } 
+		{ ChampSolution= BordNoeud BordElement Coordonnees }
+	   	{ HAdaptation=
+			{ Sequence= "1 4\n2 4\n0\n" }
+			{ Effectue= Non }
+			 Effectue= Oui 
+			{ Marge= LaMarge }
+			{ Metrique= 1 }
+			{ Taille= MeTC }
+			{ Transport=
+				{ Brique= Boite }
+				{ Methode= Logarithmique }
+				{ OptionInOut= 2 } 
+				{ TailleMax= 1024 }
+			}
+		}
+		{ Partitionnement=
+			{ Scripts=
+				{ Remaillage= Maillage/remaille.txt }
+				{ Decale= Maillage/decale.txt }
+				{ Repartitionne= Maillage/partit_ameliore.txt }
+			}
+		}
+
+		{ NbChampParametre= 2 } 
+		{ ChampParametre= MeTC Oui }
+        
+	}
+	{ Dependance= 	
+		{ Maillage= MaillagePrincipal }
+       		{ Champ= MeTC }
+       		{ Champ= Oui }
+		{ Champ= LaMarge }
+	}
+}
+
